@@ -120,34 +120,6 @@ The project includes:
 
 ---
 
-# 📁 Project Structure
-
-```
-Sentiment-Analysis/
-│
-├── assets/
-│   └── banner.png
-│
-├── data/
-│
-├── notebooks/
-│
-├── src/
-│
-├── models/
-│
-├── reports/
-│
-├── requirements.txt
-├── README.md
-├── LICENSE
-├── CONTRIBUTING.md
-├── SECURITY.md
-└── .gitignore
-```
-
----
-
 # 📈 Results
 
 The model is trained to classify reviews into:
@@ -213,5 +185,5 @@ If you discover a security issue, please read **SECURITY.md** before reporting i
 ---
 
 <p align="center">
-Made with ❤️ using Python & Deep Learning
+Made with using Python & Deep Learning
 </p>

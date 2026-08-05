@@ -67,6 +67,15 @@ The training set contains **838,944 reviews** with 11 columns:
 
 A separate metadata table maps each `asin` to a product title and brand. The unlabeled test set contains 20,000 rows and preserves the same review fields except for `overall`.
 
+### Published Datasets
+
+Both the source data and the processed Transformer-ready dataset are available on Kaggle:
+
+| Dataset | Purpose | Kaggle artifact |
+|---|---|---|
+| Amazon Review Sentiment Dataset | Raw training, test, and product-metadata files used by the project | [View or download on Kaggle](https://www.kaggle.com/datasets/maslri/amazon-review-sentiment-dataset) |
+| Balanced 50,000 | Processed and class-balanced dataset used by the Part 3 Transformer experiments | [View or use on Kaggle](https://www.kaggle.com/datasets/maslri/balanced-50000) |
+
 Dataset download links are listed in [`data/raw/dataset_link.txt`](data/raw/dataset_link.txt). After downloading, place the files under `data/raw/`:
 
 ```text
@@ -194,6 +203,15 @@ The full ordinal model improves validation micro-F1 by 2 percentage points over 
 
 > **Evaluation note:** these scores come from an artificially balanced validation split. A second validation set that preserves the raw rating distribution is recommended before interpreting the score as expected production or leaderboard performance. Text-level grouping should also be used when splitting future datasets to prevent repeated review text from appearing in both training and validation.
 
+### Published Models
+
+The trained model artifacts are available on Kaggle Models:
+
+| Model | Kaggle artifact |
+|---|---|
+| RoBERTa-base Full + Ordinal | [Download or use on Kaggle](https://www.kaggle.com/models/yasin86/roberta-keras-full-ordinal) |
+| RoBERTa-base LoRA, rank 16 | [Download or use on Kaggle](https://www.kaggle.com/models/maslri/roberta-lora-keras) |
+
 ## Submission
 
 The inference notebooks restore the saved model, reproduce its validation score, preserve test-row order, generate label-free diagnostics, and write the required file:
@@ -266,7 +284,7 @@ The second command installs packages used by the advanced notebooks and reusable
 
 ### 4. Download the data
 
-Use the links in [`data/raw/dataset_link.txt`](data/raw/dataset_link.txt), then place the three CSV files under `data/raw/` as shown in the Dataset section.
+Download the [raw dataset from Kaggle](https://www.kaggle.com/datasets/maslri/amazon-review-sentiment-dataset), or use the alternative links in [`data/raw/dataset_link.txt`](data/raw/dataset_link.txt). Then place the three CSV files under `data/raw/` as shown in the Dataset section. For the Part 3 Kaggle workflow, the [processed balanced dataset](https://www.kaggle.com/datasets/maslri/balanced-50000) can be attached directly to the training notebooks.
 
 ### 5. Run the notebooks
 

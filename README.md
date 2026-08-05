@@ -21,7 +21,7 @@ This project studies a large collection of Amazon electronics reviews and builds
 
 1. **Exploratory data analysis** — rating imbalance, word clouds, reviewer helpfulness, review length, popular products, and brand-level statistics.
 2. **Aspect-based satisfaction analysis** — Word2Vec-based discovery of warranty-related terms followed by product-level warranty satisfaction scoring.
-3. **Rating prediction** — Transformer-safe preprocessing, balanced sampling, RoBERTa LoRA and full fine-tuning experiments, ordinal-aware learning, validation diagnostics, and Kaggle-ready test submission.
+3. **Rating prediction** — Transformer-safe preprocessing, balanced sampling, RoBERTa and DeBERTa-v3 experiments, parameter-efficient and full fine-tuning, ordinal-aware learning, validation diagnostics, and Kaggle-ready test submission.
 
 The repository contains the notebooks and saved notebook outputs used for the analysis. Large raw datasets, trained model weights, and Kaggle working artifacts are intentionally kept outside Git.
 
@@ -178,15 +178,18 @@ The strongest completed model fine-tunes the full RoBERTa backbone and combines 
 
 #### DeBERTa-v3 with LoRA
 
-The repository also includes DeBERTa-v3 LoRA and timeout-resume notebooks. They define the complete training and recovery workflow, but no completed DeBERTa run or validation result is stored in the current repository.
+The DeBERTa-v3 experiment uses the same balanced split and rank-16 LoRA strategy as the RoBERTa LoRA run. Because the initial Kaggle session timed out, training was restored from `BackupAndRestore` state and completed in a second notebook without restarting the experiment. The final model reaches **0.6757 validation micro-F1** with only **2.22%** of its parameters trainable.
+
+Training workflow: [`deberta_v3_keras.ipynb`](notebooks/part3/deberta_v3_keras.ipynb) followed by the completed resume run in [`deberta-v3-resume.ipynb`](notebooks/part3/deberta-v3-resume.ipynb).
 
 ## Results
 
-Both completed RoBERTa experiments use the same balanced validation split.
+All three completed experiments use the same balanced validation split of 10,000 reviews.
 
 | Model | Fine-tuning strategy | Trainable parameters | Validation micro-F1 | Validation macro-F1 |
 |---|---|---:|---:|---:|
 | RoBERTa-base LoRA, rank 16 | Parameter-efficient | 4,176,389 (3.26%) | 0.6748 | 0.6751 |
+| DeBERTa-v3-base LoRA, rank 16 | Parameter-efficient, resumed | 4,176,389 (2.22%) | 0.6757 | 0.6738 |
 | **RoBERTa-base Full + Ordinal** | **Full backbone** | **124,647,173 (100%)** | **0.6948** | **0.6960** |
 
 Per-class F1 for the best completed model:
@@ -199,7 +202,7 @@ Per-class F1 for the best completed model:
 | 4 | 0.6891 | 0.6605 | 0.6745 |
 | 5 | 0.8310 | 0.8115 | 0.8211 |
 
-The full ordinal model improves validation micro-F1 by 2 percentage points over LoRA and performs best on the two extreme ratings. Ratings 2–4 remain more difficult because adjacent star ratings often express overlapping language.
+DeBERTa-v3 finishes 0.09 percentage points above RoBERTa LoRA in validation micro-F1, although its macro-F1 is slightly lower. The full ordinal model remains the strongest experiment, improving micro-F1 by 1.91 percentage points over DeBERTa-v3 and by 2 percentage points over RoBERTa LoRA. It performs best on the two extreme ratings, while ratings 2–4 remain more difficult because adjacent star ratings often express overlapping language.
 
 > **Evaluation note:** these scores come from an artificially balanced validation split. A second validation set that preserves the raw rating distribution is recommended before interpreting the score as expected production or leaderboard performance. Text-level grouping should also be used when splitting future datasets to prevent repeated review text from appearing in both training and validation.
 
@@ -211,6 +214,7 @@ The trained model artifacts are available on Kaggle Models:
 |---|---|
 | RoBERTa-base Full + Ordinal | [Download or use on Kaggle](https://www.kaggle.com/models/yasin86/roberta-keras-full-ordinal) |
 | RoBERTa-base LoRA, rank 16 | [Download or use on Kaggle](https://www.kaggle.com/models/maslri/roberta-lora-keras) |
+| DeBERTa-v3-base LoRA, rank 16 | [Download or use on Kaggle](https://www.kaggle.com/models/alisalari76/deberta-v3-keras) |
 
 ## Submission
 
@@ -298,8 +302,11 @@ Run the Part 3 workflow in this order:
 
 1. `notebooks/part3/eda.ipynb`
 2. `notebooks/part3/preprocessing_kaggle.ipynb`
-3. `notebooks/part3/roberta_keras_lora.ipynb` or `roberta_keras_full_ordinal.ipynb`
-4. The matching test-inference notebook
+3. Run one of the model experiments:
+   - `notebooks/part3/roberta_keras_lora.ipynb`
+   - `notebooks/part3/roberta_keras_full_ordinal.ipynb`
+   - `notebooks/part3/deberta_v3_keras.ipynb`, followed by `deberta-v3-resume.ipynb` if the Kaggle session times out
+4. Run the matching test-inference notebook when available
 
 The Transformer notebooks are designed for Kaggle GPU sessions. Update the configuration cells if your Kaggle dataset or model slugs differ from the paths saved in the executed notebooks.
 
@@ -321,7 +328,7 @@ Exact reproduction also requires the same Kaggle dataset version, Keras/KerasHub
 - Create train/validation splits grouped by normalized review-text hash to eliminate text-level leakage.
 - Evaluate the selected model on a validation set with the original class distribution.
 - Compare balanced sampling with class-weighted training on all available reviews.
-- Complete and benchmark the DeBERTa-v3 experiment.
+- Add a dedicated DeBERTa-v3 inference notebook and compare all three models on the hidden test set.
 - Consolidate duplicated notebook logic into the reusable `src/` package.
 - Add pinned dependencies and automated tests for preprocessing and submission integrity.
 - Explore probability calibration or prior correction if the hidden test distribution follows the raw training distribution.

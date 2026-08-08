@@ -1,0 +1,33 @@
+import BilingualPresentation, { PresentationData } from "./BilingualPresentation";
+
+const data: PresentationData = {
+  part: "PART 4",
+  eyebrow: { fa: "Bonus · پیش‌بینی امتیاز محصول", en: "Bonus · Product rating prediction" },
+  title: { fa: "وقتی تعامل و متن کنار هم قرار می‌گیرند", en: "When interaction meets review text" },
+  subtitle: { fa: "مقایسه SVD، NCF و مدل ترکیبی TF-IDF", en: "SVD, NCF, and a TF-IDF hybrid model" },
+  description: { fa: "بخش Bonus امتیاز ۱ تا ۵ کاربر به محصول را از دو منبع سیگنال پیش‌بینی می‌کند: الگوی تعامل کاربر–کالا و محتوای متن نقد. سه مدل مرحله‌به‌مرحله ساخته و با RMSE و MAE مقایسه شدند.", en: "The Bonus track predicts 1–5 product ratings from two signals: user-item interaction patterns and review text. Three models are built step by step and compared with RMSE and MAE." },
+  metrics: [
+    { value:"1.1132", title:{fa:"RMSE مدل SVD",en:"SVD RMSE"}, detail:{fa:"خط پایهٔ collaborative filtering",en:"Collaborative-filtering baseline"} },
+    { value:"1.1227", title:{fa:"RMSE مدل NCF",en:"NCF RMSE"}, detail:{fa:"یادگیری غیرخطی embeddingها",en:"Nonlinear embedding interactions"} },
+    { value:"0.9567", title:{fa:"بهترین RMSE",en:"Best RMSE"}, detail:{fa:"مدل ترکیبی NCF + TF-IDF",en:"Hybrid NCF + TF-IDF"} },
+    { value:"0.5998", title:{fa:"بهترین MAE",en:"Best MAE"}, detail:{fa:"میانگین فاصلهٔ مطلق از امتیاز واقعی",en:"Mean absolute distance from the true rating"} }
+  ],
+  findings: [
+    { title:{fa:"آماده‌سازی تعامل‌ها",en:"Interaction preparation"}, text:{fa:"شناسهٔ reviewerID به‌عنوان کاربر، asin به‌عنوان کالا و overall به‌عنوان هدف نگه داشته شد؛ داده‌های ناقص و تکراری حذف و کاربران و کالاهای کم‌تعامل فیلتر شدند.",en:"reviewerID becomes the user, asin the item, and overall the target; missing and duplicate rows are removed and sparse users/items are filtered."} },
+    { title:{fa:"یادگیری embedding",en:"Learning embeddings"}, text:{fa:"NCF برای هر کاربر و محصول یک بردار قابل‌آموزش می‌سازد و ارتباط غیرخطی آن‌ها را با لایه‌های Dense به امتیاز تبدیل می‌کند.",en:"NCF learns trainable user and item vectors, then maps their nonlinear interaction to a rating through dense layers."} },
+    { title:{fa:"افزودن معنای نقد",en:"Adding review semantics"}, text:{fa:"در مدل نهایی، ویژگی‌های TF-IDF متن به embeddingهای کاربر و کالا اضافه شدند تا مدل علاوه بر «چه کسی و چه محصولی»، محتوای تجربه را هم ببیند.",en:"The final model fuses TF-IDF text features with user and item embeddings so it can model both interaction identity and experience content."} }
+  ],
+  architectures: [
+    { name:"SVD", badge:{fa:"خط پایه کلاسیک",en:"Classical baseline"}, params:"100 factors", trainable:"20 epochs", trainablePct:"RMSE 1.1132", layers:[{fa:"سه‌تایی کاربر، محصول، امتیاز",en:"User, item, rating triplets"},{fa:"تقسیم train/test با seed 42",en:"Train/test split with seed 42"},{fa:"فاکتورهای نهفته کاربر و کالا",en:"User and item latent factors"},{fa:"ضرب داخلی + biasها",en:"Dot product + biases"},{fa:"محدودسازی خروجی در بازه ۱ تا ۵",en:"Clip prediction to the 1–5 range"}], tricks:[{fa:"Surprise SVD",en:"Surprise SVD"},{fa:"100 عامل نهفته",en:"100 latent factors"},{fa:"LR = 0.005",en:"LR = 0.005"},{fa:"Regularization = 0.02",en:"Regularization = 0.02"},{fa:"Grid search سه‌مرحله‌ای",en:"3-fold grid search"}] },
+    { name:"NCF", badge:{fa:"Collaborative عصبی",en:"Neural collaborative"}, params:"64-d emb.", trainable:"Dense head", trainablePct:"RMSE 1.1227", layers:[{fa:"Label encoding کاربر و محصول",en:"User and item label encoding"},{fa:"Embedding کاربر ۶۴بعدی",en:"64-dimensional user embedding"},{fa:"Embedding محصول ۶۴بعدی",en:"64-dimensional item embedding"},{fa:"Concatenate → Dense 128",en:"Concatenate → Dense 128"},{fa:"Dropout 0.2 → Dense 64 → 32",en:"Dropout 0.2 → Dense 64 → 32"},{fa:"خروجی خطی امتیاز",en:"Linear rating output"}], tricks:[{fa:"Adam + MSE",en:"Adam + MSE"},{fa:"MAE به‌عنوان metric",en:"MAE as metric"},{fa:"Batch size = 256",en:"Batch size = 256"},{fa:"۱۰ epoch",en:"10 epochs"},{fa:"Keras Tuner",en:"Keras Tuner"}] },
+    { name:"NCF + TF-IDF", badge:{fa:"مدل ترکیبی برتر",en:"Winning hybrid"}, params:"1,000 text", trainable:"32-d emb.", trainablePct:"RMSE 0.9567", layers:[{fa:"پاک‌سازی HTML، URL و stopword",en:"Clean HTML, URLs, and stopwords"},{fa:"TF-IDF هزاربعدی · unigram + bigram",en:"1,000-d TF-IDF · unigram + bigram"},{fa:"شاخه متن: Dense 64 → Dropout → 32",en:"Text branch: Dense 64 → Dropout → 32"},{fa:"embedding کاربر و محصول ۳۲بعدی",en:"32-dimensional user/item embeddings"},{fa:"ادغام سه شاخه → Dense 64",en:"Fuse three branches → Dense 64"},{fa:"Dropout 0.3 → Dense 32 → Rating",en:"Dropout 0.3 → Dense 32 → Rating"}], tricks:[{fa:"Adam · LR 0.0005",en:"Adam · LR 0.0005"},{fa:"MSE loss",en:"MSE loss"},{fa:"Batch size = 256",en:"Batch size = 256"},{fa:"خروجی محدود به ۱ تا ۵",en:"Output clipped to 1–5"},{fa:"ویژگی‌های محتوایی + تعاملی",en:"Content + interaction features"}] }
+  ],
+  tables: [
+    { title:{fa:"نتیجهٔ نهایی مدل‌ها",en:"Final model benchmark"}, description:{fa:"مقادیر کمتر برای هر دو معیار بهتر هستند.",en:"Lower values are better for both metrics."}, columns:[{fa:"مدل",en:"Model"},{fa:"RMSE",en:"RMSE"},{fa:"MAE",en:"MAE"}], rows:[["SVD","1.1132","0.8446"],["NCF","1.1227","0.8471"],["NCF + TF-IDF","0.9567","0.5998"]], source:"Benchmark_scoring_section.csv" },
+    { title:{fa:"تنظیمات کلیدی پیاده‌سازی",en:"Key implementation settings"}, description:{fa:"خلاصه تنظیمات اصلی سه مسیر برای مقایسه سریع.",en:"A compact view of the main settings for all three tracks."}, columns:[{fa:"مدل",en:"Model"},{fa:"نمایش",en:"Representation"},{fa:"بهینه‌ساز",en:"Optimizer"},{fa:"Batch / Epoch",en:"Batch / Epoch"}], rows:[["SVD","100 latent factors","SGD-style","— / 20"],["NCF","64-d user/item","Adam","256 / 10"],["NCF + TF-IDF","32-d + 1,000 text","Adam 5e-4","256 / 10"]], source:"Rating_predicttion.ipynb" }
+  ],
+  groups: [],
+  takeaway: { fa:"نتیجهٔ Bonus روشن است: تعامل‌های کاربر و محصول پایهٔ خوبی برای پیش‌بینی می‌سازند، اما اضافه‌شدن محتوای نقد تصویر کامل‌تری از تجربهٔ کاربر فراهم می‌کند. مدل ترکیبی با کاهش حدود ۱۴٪ RMSE و ۲۹٪ MAE نسبت به SVD نشان داد که بهترین پیش‌بینی زمانی به‌دست می‌آید که سیگنال collaborative و متن در یک معماری واحد یاد گرفته شوند.", en:"The Bonus result is clear: user-item interactions provide a useful foundation, but review content completes the picture of user experience. By reducing RMSE by about 14% and MAE by about 29% versus SVD, the hybrid model shows that the strongest rating prediction comes from learning collaborative and textual signals together." }
+};
+
+export default function BonusPresentation(){ return <BilingualPresentation data={data} />; }
